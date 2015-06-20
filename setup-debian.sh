@@ -280,16 +280,16 @@ function install_php {
 	check_install php5-cli php5-cli
 
 	# PHP modules
-	DEBIAN_FRONTEND=noninteractive apt-get -y install php5-apc php5-suhosin php5-curl php5-gd php5-intl php5-mcrypt php-gettext php5-mysql php5-sqlite
+	DEBIAN_FRONTEND=noninteractive apt-get -y install php5-apc php5-curl php5-gd php5-intl php5-mcrypt php-gettext php5-mysql php5-sqlite
 
 	echo 'Using PHP-FPM to manage PHP processes'
 	echo ' '
 
         print_info "Taking configuration backups in /root/bkps; you may keep or delete this directory"
         mkdir /root/bkps
-	mv /etc/php5/conf.d/apc.ini /root/bkps/apc.ini
+	mv /etc/php5/conf.d/20-apc.ini /root/bkps/20-apc.ini
 
-cat > /etc/php5/conf.d/apc.ini <<END
+cat > /etc/php5/conf.d/20-apc.ini <<END
 [APC]
 extension=apc.so
 apc.enabled=1
@@ -306,20 +306,21 @@ apc.enable_cli=0
 apc.rfc1867=0
 END
 
-	mv /etc/php5/conf.d/suhosin.ini /root/bkps/suhosin.ini
-
-cat > /etc/php5/conf.d/suhosin.ini <<END
-; configuration for php suhosin module
-extension=suhosin.so
-suhosin.executor.include.whitelist="phar"
-suhosin.request.max_vars = 2048
-suhosin.post.max_vars = 2048
-suhosin.request.max_array_index_length = 256
-suhosin.post.max_array_index_length = 256
-suhosin.request.max_totalname_length = 8192
-suhosin.post.max_totalname_length = 8192
-suhosin.sql.bailout_on_error = Off
-END
+#Disable SUHOSIN
+#	mv /etc/php5/conf.d/suhosin.ini /root/bkps/suhosin.ini
+#
+#cat > /etc/php5/conf.d/suhosin.ini <<END
+#; configuration for php suhosin module
+#extension=suhosin.so
+#suhosin.executor.include.whitelist="phar"
+#suhosin.request.max_vars = 2048
+#suhosin.post.max_vars = 2048
+#suhosin.request.max_array_index_length = 256
+#suhosin.post.max_array_index_length = 256
+#suhosin.request.max_totalname_length = 8192
+#suhosin.post.max_totalname_length = 8192
+#suhosin.sql.bailout_on_error = Off
+#END
 
 	if [ -f /etc/php5/fpm/php.ini ]
 		then
@@ -413,7 +414,8 @@ location ~ \.php$ {
 	fastcgi_temp_file_write_size 256k;
 	fastcgi_intercept_errors    on;
 	fastcgi_ignore_client_abort off;
-	fastcgi_pass 127.0.0.1:9000;
+	#fastcgi_pass 127.0.0.1:9000;
+	fastcgi_pass unix:/var/run/php5-fpm.sock;
 
 }
 # PHP search for file Exploit:
@@ -627,7 +629,8 @@ server {
     {
         try_files \$uri =404;
 
-        fastcgi_pass 127.0.0.1:9000;
+        #fastcgi_pass 127.0.0.1:9000;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME /var/www/$1/public\$fastcgi_script_name;
         include fastcgi_params;
@@ -902,6 +905,11 @@ function install_webmin {
 	dpkg -i /tmp/webmin.deb
 	rm -fr /tmp/webmin.deb
 	print_warn "Special Note: If the installation ends with an error, please run it again"
+}
+
+function install_curl{
+	print_info "Checking curl"
+	check_install curl curl
 }
 
 ############################################################
@@ -1275,6 +1283,7 @@ system)
 	install_iotop
 	install_iftop
 	install_syslogd
+	install_curl
 	apt_clean
 	;;
 *)
