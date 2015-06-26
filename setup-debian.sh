@@ -907,7 +907,7 @@ function install_webmin {
 	print_warn "Special Note: If the installation ends with an error, please run it again"
 }
 
-function install_curl{
+function install_curl {
 	print_info "Checking curl"
 	check_install curl curl
 }
