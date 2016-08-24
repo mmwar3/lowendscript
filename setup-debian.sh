@@ -815,6 +815,13 @@ function remove_unneeded {
 		check_remove /usr/lib/sm.bin/smtpd 'sendmail*'
 	fi
 }
+function remove_unneeded {
+	check_remove mysqld mysql-server
+	check_remove mysql mysql-client
+	check_remove php5-fpm php5-fpm
+	check_remove php5-cli php5-cli
+	check_remove nginx nginx
+	{
 
 ############################################################
 # Download ps_mem.py
@@ -1208,6 +1215,9 @@ export PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 check_sanity
 case "$1" in
+remove)
+	remove_all
+	;;
 mysql)
 	install_mysql
 	;;
