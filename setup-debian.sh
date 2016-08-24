@@ -815,7 +815,7 @@ function remove_unneeded {
 		check_remove /usr/lib/sm.bin/smtpd 'sendmail*'
 	fi
 }
-function remove_unneeded {
+function remove_all {
 	check_remove mysqld mysql-server
 	check_remove mysql mysql-client
 	check_remove php5-fpm php5-fpm
